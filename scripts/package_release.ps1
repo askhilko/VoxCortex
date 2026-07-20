@@ -10,6 +10,7 @@ $StageApp = Join-Path $StageRoot 'M5AIDictationServer'
 $Version = (Get-Content -LiteralPath (Join-Path $Root 'firmware\version.json') -Raw |
     ConvertFrom-Json).version
 $Archive = Join-Path $ReleaseDir "M5AIDictationServer-$Version-windows.zip"
+$Python = Join-Path $Root '.venv\Scripts\python.exe'
 $ExcludedRuntimeItems = @('models', 'history.json', 'logs', 'tmp', 'config.yaml')
 
 $RootFull = [IO.Path]::GetFullPath($Root).TrimEnd('\') + '\'
@@ -19,6 +20,9 @@ if (-not $StageFull.StartsWith($RootFull, [StringComparison]::OrdinalIgnoreCase)
 }
 if (-not (Test-Path -LiteralPath (Join-Path $AppDir 'M5AIDictationServer.exe'))) {
     throw 'Windows application not found. Run .\scripts\build_server_exe.ps1 first.'
+}
+if (-not (Test-Path -LiteralPath $Python)) {
+    throw 'Virtual environment not found. Run .\scripts\setup_windows.ps1 first.'
 }
 
 if (Test-Path -LiteralPath $StageRoot) {
@@ -48,5 +52,9 @@ if (Test-Path -LiteralPath $Archive) {
     Remove-Item -LiteralPath $Archive -Force
 }
 Compress-Archive -Path $StageApp -DestinationPath $Archive -CompressionLevel Optimal
+& $Python (Join-Path $Root 'tools\verify_release_archive.py') $Archive
+if ($LASTEXITCODE -ne 0) {
+    throw 'Release archive validation failed.'
+}
 & (Join-Path $PSScriptRoot 'update_release_hashes.ps1')
 Write-Host "Built clean release archive: $Archive"

@@ -19,6 +19,9 @@ Windows, локально распознаётся с помощью faster-whis
 
 1. Установите Python 3.11, 3.12 или 3.14 и PlatformIO Core.
 2. Выполните `powershell -ExecutionPolicy Bypass -File .\scripts\setup_windows.ps1`.
+   Безопасные автоматические тесты запускаются командой
+   `.\.venv\Scripts\python.exe -m pytest -q` и не используют реальные пользовательские данные,
+   сеть или подключённое устройство.
 3. Проверьте `%LOCALAPPDATA%\M5AIDictationRemote\config.yaml`. Полное приложение запускается из исходников командой
    `.\scripts\start_tray.ps1` или задачей VS Code `M5: Запустить приложение из исходников`. Консольный
    сервер без GUI запускается через `.\scripts\start_server.ps1`.

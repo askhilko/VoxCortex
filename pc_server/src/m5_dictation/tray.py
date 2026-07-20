@@ -12,6 +12,7 @@ import tkinter as tk
 from collections.abc import Callable
 from dataclasses import replace
 from pathlib import Path
+from tkinter import messagebox
 
 import pystray
 
@@ -58,6 +59,7 @@ class TrayApplication:
             self.change_action,
             self.open_settings,
             self.open_firmware_update,
+            self.clear_history,
         )
         self.history.set_action(settings.device.action)
         for event in self.history_store.items:
@@ -239,6 +241,20 @@ class TrayApplication:
         connected = [event for event in self.device_statuses.values() if event.connected]
         current = max(connected, key=lambda event: event.updated_at) if connected else None
         self.firmware_window.show(current)
+
+    def clear_history(self) -> None:
+        if not self.history_store.items:
+            self.history.status.configure(text="История уже пуста", foreground="#425466")
+            return
+        if not messagebox.askyesno(
+            "Очистка истории",
+            "Удалить все сохранённые распознанные фразы? Отменить это действие нельзя.",
+            parent=self.root,
+        ):
+            return
+        self.history_store.clear()
+        self.history.clear_events()
+        self.history.status.configure(text="История очищена", foreground="#197447")
 
     def change_action(self, action: str) -> None:
         if action == self.settings.device.action:

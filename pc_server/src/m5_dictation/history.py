@@ -62,6 +62,7 @@ class RecognitionHistoryWindow:
         on_action_changed: Callable[[str], None] | None = None,
         on_open_settings: Callable[[], None] | None = None,
         on_open_firmware: Callable[[], None] | None = None,
+        on_clear_history: Callable[[], None] | None = None,
     ) -> None:
         self.root = root
         self.on_close = on_close
@@ -70,6 +71,7 @@ class RecognitionHistoryWindow:
         self.on_action_changed = on_action_changed
         self.on_open_settings = on_open_settings
         self.on_open_firmware = on_open_firmware
+        self.on_clear_history = on_clear_history
         self.rows: list[tk.Frame] = []
         self.empty_label: ttk.Label | None = None
         self.devices: dict[str, DeviceStatusEvent] = {}
@@ -210,13 +212,21 @@ class RecognitionHistoryWindow:
         self.execute_button.pack(side="right")
 
     def _build_history(self, parent: tk.Widget) -> None:
+        heading = tk.Frame(parent, background="#F3F5F7")
+        heading.pack(fill="x", pady=(2, 7))
         tk.Label(
-            parent,
+            heading,
             text="Последние фразы",
             background="#F3F5F7",
             foreground="#172B3A",
             font=("Segoe UI Semibold", 11),
-        ).pack(anchor="w", pady=(2, 7))
+        ).pack(side="left")
+        if self.on_clear_history is not None:
+            ttk.Button(
+                heading,
+                text="Очистить историю",
+                command=self.on_clear_history,
+            ).pack(side="right")
         history = tk.Frame(parent, background="#F3F5F7")
         history.pack(fill="both", expand=True)
         self.canvas = tk.Canvas(history, background="#F3F5F7", highlightthickness=0)
@@ -388,3 +398,17 @@ class RecognitionHistoryWindow:
             self.rows.pop(0).destroy()
         self.root.update_idletasks()
         self.canvas.yview_moveto(1.0)
+
+    def clear_events(self) -> None:
+        for row in self.rows:
+            row.destroy()
+        self.rows.clear()
+        if self.empty_label is None:
+            self.empty_label = ttk.Label(
+                self.list_frame,
+                text="Здесь появятся распознанные фразы",
+                foreground="#6B7785",
+                font=("Segoe UI", 11),
+            )
+            self.empty_label.pack(pady=45)
+        self.canvas.yview_moveto(0.0)

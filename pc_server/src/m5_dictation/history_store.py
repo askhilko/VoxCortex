@@ -38,6 +38,12 @@ class RecognitionHistoryStore:
         self._items = self._items[-self.max_items :]
         self._save()
 
+    def clear(self) -> None:
+        """Forget all recognition events and remove their persisted copy."""
+        self._items.clear()
+        self.path.unlink(missing_ok=True)
+        self.path.with_name(f".{self.path.name}.tmp").unlink(missing_ok=True)
+
     def _save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         document = {

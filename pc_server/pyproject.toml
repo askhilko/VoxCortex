@@ -23,6 +23,7 @@ dependencies = [
 speech = ["faster-whisper>=1.1,<2", "huggingface-hub>=1.0,<2"]
 build = ["pyinstaller>=6.13,<7"]
 firmware = ["esptool>=5,<6", "pyserial>=3.5,<4"]
+test = ["pytest>=8.3,<10"]
 
 [project.scripts]
 m5-dictation-server = "m5_dictation.cli:main"

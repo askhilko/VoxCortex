@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: windows-latest
@@ -13,6 +16,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install platformio ".\pc_server[firmware]"
+      - run: python -m pip install platformio ".\pc_server[speech,firmware,test]"
       - run: python -m compileall -q pc_server/src tools
+      - run: python -m pytest -q
       - run: pio run -d firmware
