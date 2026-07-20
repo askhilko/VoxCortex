@@ -1,0 +1,23 @@
+host: 0.0.0.0
+port: 8765
+temp_dir: tmp
+keep_wav: false
+log_dir: logs
+diagnostic: false
+insertion_enabled: true
+paste_delay_ms: 300
+restore_clipboard: false
+
+device:
+  action: paste
+  max_recording_seconds: 120
+  sounds_enabled: true
+
+speech:
+  model: small
+  models_dir: models
+  language: ru
+  vad: true
+  beam_size: 5
+  min_duration_seconds: 0.3
+  max_duration_seconds: 120

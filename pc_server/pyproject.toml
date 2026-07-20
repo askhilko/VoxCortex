@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "m5-ai-dictation-server"
+version = "1.7.1"
+description = "Local speech-to-text server for M5StickC Plus2"
+license = "MIT"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "PyYAML>=6.0,<7",
+  "pyperclip>=1.9,<2",
+  "pyautogui>=0.9.54,<1",
+  "zeroconf>=0.147,<1",
+  "pystray>=0.19,<1",
+  "Pillow>=10,<13",
+]
+
+[project.optional-dependencies]
+speech = ["faster-whisper>=1.1,<2", "huggingface-hub>=1.0,<2"]
+build = ["pyinstaller>=6.13,<7"]
+firmware = ["esptool>=5,<6", "pyserial>=3.5,<4"]
+
+[project.scripts]
+m5-dictation-server = "m5_dictation.cli:main"
+m5-dictation-tray = "m5_dictation.tray:main"
+m5-dictation-flash = "m5_dictation.firmware_updater:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

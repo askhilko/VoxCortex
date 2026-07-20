@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Check release version
+        run: >-
+          python -c "import json, os, pathlib, tomllib;
+          root=pathlib.Path('.');
+          fw=json.loads((root/'firmware/version.json').read_text())['version'];
+          app=tomllib.loads((root/'pc_server/pyproject.toml').read_text())['project']['version'];
+          tag=os.environ['GITHUB_REF_NAME'];
+          assert fw == app and tag == 'v' + fw, f'version mismatch: tag={tag}, app={app}, firmware={fw}'"
+      - name: Install build dependencies
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install platformio ".\pc_server[speech,firmware,build]"
+      - run: .\.venv\Scripts\python.exe -m compileall -q pc_server/src tools
+      - name: Build firmware package
+        shell: pwsh
+        run: .\scripts\build_firmware.ps1
+      - name: Build Windows application with integrated updater
+        shell: pwsh
+        run: .\scripts\build_server_exe.ps1 -SkipInstall
+      - name: Create Windows application archive
+        shell: pwsh
+        run: .\scripts\package_release.ps1
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $app = Get-ChildItem release\M5AIDictationServer-*-windows.zip | Select-Object -First 1
+          $firmware = Get-ChildItem release\M5AIDictationFirmware-*-windows.zip | Select-Object -First 1
+          gh release create $env:GITHUB_REF_NAME --generate-notes $app.FullName $firmware.FullName release\SHA256SUMS.txt
