@@ -100,7 +100,7 @@ def create_app(
     on_recognition: RecognitionCallback | None = None,
     on_device_status: DeviceStatusCallback | None = None,
 ) -> FastAPI:
-    app = FastAPI(title="M5 AI Dictation", version=__version__)
+    app = FastAPI(title="VoxCortex", version=__version__)
     runtime = Runtime(settings, transcriber, inserter, on_recognition, on_device_status)
     app.state.runtime = runtime
 

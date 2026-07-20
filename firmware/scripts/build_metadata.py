@@ -25,7 +25,10 @@ def source_fingerprint(firmware_dir: Path) -> str:
 
 
 def resolve_build_id(repository_root: Path) -> str:
-    configured = os.environ.get("M5_FIRMWARE_BUILD", "").strip()
+    configured = (
+        os.environ.get("VOXCORTEX_FIRMWARE_BUILD")
+        or os.environ.get("M5_FIRMWARE_BUILD", "")
+    ).strip()
     if configured:
         return configured
     try:

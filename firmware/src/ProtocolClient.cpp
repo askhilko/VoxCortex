@@ -29,12 +29,12 @@ void ProtocolClient::tick() { socket_.loop(); }
 void ProtocolClient::sendHello() {
   JsonDocument document;
   document["type"] = "hello";
-  document["protocol_version"] = M5_PROTOCOL_VERSION;
+  document["protocol_version"] = VOXCORTEX_PROTOCOL_VERSION;
   document["device_id"] = deviceId_;
   document["device_name"] = config_.deviceName;
-  document["firmware_version"] = M5_FIRMWARE_VERSION;
-  document["firmware_build"] = M5_FIRMWARE_BUILD;
-  document["board"] = M5_FIRMWARE_BOARD;
+  document["firmware_version"] = VOXCORTEX_FIRMWARE_VERSION;
+  document["firmware_build"] = VOXCORTEX_FIRMWARE_BUILD;
+  document["board"] = VOXCORTEX_FIRMWARE_BOARD;
   document["action"] = actionId(config_.action);
   document["max_recording_seconds"] = config_.maxRecordingSeconds;
   document["sounds_enabled"] = config_.soundsEnabled;
@@ -98,9 +98,9 @@ void ProtocolClient::sendTelemetry(int32_t batteryPercent, bool charging, int32_
   document["battery_percent"] = batteryPercent;
   document["charging"] = charging;
   document["rssi"] = rssi;
-  document["firmware_version"] = M5_FIRMWARE_VERSION;
-  document["firmware_build"] = M5_FIRMWARE_BUILD;
-  document["board"] = M5_FIRMWARE_BOARD;
+  document["firmware_version"] = VOXCORTEX_FIRMWARE_VERSION;
+  document["firmware_build"] = VOXCORTEX_FIRMWARE_BUILD;
+  document["board"] = VOXCORTEX_FIRMWARE_BOARD;
   String json;
   serializeJson(document, json);
   socket_.sendTXT(json);

@@ -17,8 +17,5 @@ pc_server/logs/
 pc_server/tmp/
 pc_server/history.json
 pc_server/models/
-release/*.zip
-release/*.bin
-release/SHA256SUMS.txt
-release/firmware/
-release/M5AIDictationServer/
+# Release artifacts are published by GitHub Actions and never tracked.
+release/

@@ -6,7 +6,7 @@ DeviceConfig SettingsStore::load() {
   preferences_.begin("dictation", false);
   result.ssid = preferences_.isKey("ssid") ? preferences_.getString("ssid") : "";
   result.password = preferences_.isKey("wifi_pass") ? preferences_.getString("wifi_pass") : "";
-  result.serverHost = preferences_.isKey("host") ? preferences_.getString("host") : "ai-dictation.local";
+  result.serverHost = preferences_.isKey("host") ? preferences_.getString("host") : "voxcortex.local";
   result.serverPort = preferences_.getUShort("port", 8765);
   result.deviceName = preferences_.isKey("name") ? preferences_.getString("name") : "";
   if (preferences_.isKey("action")) {

@@ -26,7 +26,7 @@ enum class OutputAction { Copy, Paste, PasteEnter, PasteCtrlEnter };
 struct DeviceConfig {
   String ssid;
   String password;
-  String serverHost = "ai-dictation.local";
+  String serverHost = "voxcortex.local";
   uint16_t serverPort = 8765;
   String deviceName;
   OutputAction action = OutputAction::Paste;

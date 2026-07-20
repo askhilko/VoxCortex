@@ -73,7 +73,7 @@ class FirmwareUpdateWindow:
     def _build(self) -> None:
         window = tk.Toplevel(self.root)
         self.window = window
-        window.title("M5 AI Dictation — прошивка")
+        window.title("VoxCortex — прошивка")
         window.geometry("720x590")
         window.minsize(640, 520)
         window.transient(self.root)

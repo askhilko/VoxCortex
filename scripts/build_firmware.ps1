@@ -26,7 +26,7 @@ if (Test-Path -LiteralPath $LegacyUpdater) {
 Copy-Item docs\USER_GUIDE.md release\firmware\README.md -Force
 $Version = (Get-Content -LiteralPath (Join-Path $Root 'firmware\version.json') -Raw |
     ConvertFrom-Json).version
-$Archive = Join-Path $Root "release\M5AIDictationFirmware-$Version-windows.zip"
+$Archive = Join-Path $Root "release\VoxCortexFirmware-$Version-windows.zip"
 if (Test-Path -LiteralPath $Archive) {
     Remove-Item -LiteralPath $Archive -Force
 }

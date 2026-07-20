@@ -8,7 +8,7 @@ from .runtime import ServerRuntime, configure_logging
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="M5 AI Dictation local server")
+    parser = argparse.ArgumentParser(description="VoxCortex local AI voice server")
     parser.add_argument("--config", type=Path, help="Path to YAML configuration")
     args = parser.parse_args()
     config_path = args.config.resolve() if args.config else prepare_user_config()

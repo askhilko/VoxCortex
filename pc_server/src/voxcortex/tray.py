@@ -78,9 +78,9 @@ class TrayApplication:
             on_device_status=self.device_events.put,
         )
         self.icon = pystray.Icon(
-            "m5-ai-dictation",
+            "voxcortex",
             create_tray_image("starting"),
-            "M5 AI Dictation — запуск",
+            "VoxCortex — запуск",
             menu=self._create_menu(),
         )
         self._watcher: threading.Thread | None = None
@@ -142,7 +142,7 @@ class TrayApplication:
             time.sleep(0.1)
         if runtime.running:
             self.icon.icon = create_tray_image("running")
-            self.icon.title = "M5 AI Dictation — готово"
+            self.icon.title = "VoxCortex — готово"
             self.gui_actions.put(lambda: self.history.set_server_ready(runtime.settings.port))
             LOG.info("Tray-приложение готово")
             try:
@@ -151,7 +151,7 @@ class TrayApplication:
                 LOG.debug("Windows-уведомление недоступно", exc_info=True)
         else:
             self.icon.icon = create_tray_image("error")
-            self.icon.title = "M5 AI Dictation — ошибка запуска"
+            self.icon.title = "VoxCortex — ошибка запуска"
             self.gui_actions.put(self.history.set_server_error)
             LOG.error("Сервер не запустился; диагностический журнал: %s", self.log_path)
         self.icon.update_menu()
@@ -354,13 +354,13 @@ class TrayApplication:
 
 def show_error(message: str) -> None:
     if os.name == "nt":
-        ctypes.windll.user32.MessageBoxW(None, message, "M5 AI Dictation", 0x10)
+        ctypes.windll.user32.MessageBoxW(None, message, "VoxCortex", 0x10)
     else:
         print(message, file=sys.stderr)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="M5 AI Dictation Windows tray server")
+    parser = argparse.ArgumentParser(description="VoxCortex Windows AI voice server")
     parser.add_argument("--config", type=Path)
     args = parser.parse_args()
     try:
@@ -371,7 +371,7 @@ def main() -> None:
         TrayApplication(settings, log_path, config_path).run()
     except Exception as exc:
         logging.exception("Не удалось запустить tray-приложение")
-        show_error(f"Не удалось запустить M5 AI Dictation.\n\n{exc}")
+        show_error(f"Не удалось запустить VoxCortex.\n\n{exc}")
         raise SystemExit(1) from exc
 
 

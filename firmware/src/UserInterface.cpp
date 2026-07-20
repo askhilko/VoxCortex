@@ -21,7 +21,7 @@ void UserInterface::showProvisioning(const String& apName, const String& ip) {
 
 const char* UserInterface::stateTitle(AppState state) const {
   switch (state) {
-    case AppState::Ready: return "AI DICTATION";
+    case AppState::Ready: return "VOXCORTEX";
     case AppState::AutoListening: return "AUTO LISTEN";
     case AppState::AutoRecording: return "AUTO SPEECH";
     case AppState::Recording: return "LISTENING";
@@ -36,7 +36,7 @@ const char* UserInterface::stateTitle(AppState state) const {
     case AppState::StartingRecording: return "STARTING MIC";
     case AppState::Provisioning: return "SETUP";
   }
-  return "AI DICTATION";
+  return "VOXCORTEX";
 }
 
 void UserInterface::showState(AppState state, const String& message, const DeviceConfig& config,

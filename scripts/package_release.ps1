@@ -4,12 +4,12 @@ param()
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 $ReleaseDir = Join-Path $Root 'release'
-$AppDir = Join-Path $ReleaseDir 'M5AIDictationServer'
+$AppDir = Join-Path $ReleaseDir 'VoxCortex'
 $StageRoot = Join-Path $Root '.build\release-package'
-$StageApp = Join-Path $StageRoot 'M5AIDictationServer'
+$StageApp = Join-Path $StageRoot 'VoxCortex'
 $Version = (Get-Content -LiteralPath (Join-Path $Root 'firmware\version.json') -Raw |
     ConvertFrom-Json).version
-$Archive = Join-Path $ReleaseDir "M5AIDictationServer-$Version-windows.zip"
+$Archive = Join-Path $ReleaseDir "VoxCortex-$Version-windows.zip"
 $Python = Join-Path $Root '.venv\Scripts\python.exe'
 $ExcludedRuntimeItems = @('models', 'history.json', 'logs', 'tmp', 'config.yaml')
 
@@ -18,7 +18,7 @@ $StageFull = [IO.Path]::GetFullPath($StageRoot)
 if (-not $StageFull.StartsWith($RootFull, [StringComparison]::OrdinalIgnoreCase)) {
     throw "Unsafe release staging path: $StageFull"
 }
-if (-not (Test-Path -LiteralPath (Join-Path $AppDir 'M5AIDictationServer.exe'))) {
+if (-not (Test-Path -LiteralPath (Join-Path $AppDir 'VoxCortex.exe'))) {
     throw 'Windows application not found. Run .\scripts\build_server_exe.ps1 first.'
 }
 if (-not (Test-Path -LiteralPath $Python)) {

@@ -82,7 +82,7 @@ class ServerRuntime:
         self.thread: threading.Thread | None = None
         self.failure: BaseException | None = None
         self._zeroconf: Zeroconf | None = None
-        self._service: ServiceInfo | None = None
+        self._services: list[ServiceInfo] = []
 
     def apply_settings(self, settings: Settings) -> WhisperTranscriber | None:
         """Apply GUI-editable settings without restarting the server or losing UI state."""
@@ -140,17 +140,24 @@ class ServerRuntime:
             address = socket.gethostbyname(socket.gethostname())
             if address.startswith("127."):
                 return
-            self._service = ServiceInfo(
-                "_m5-dictation._tcp.local.",
-                "M5 AI Dictation._m5-dictation._tcp.local.",
-                addresses=[socket.inet_aton(address)],
-                port=self.settings.port,
-                properties={"protocol": "1"},
-                server="ai-dictation.local.",
-            )
             self._zeroconf = Zeroconf()
-            self._zeroconf.register_service(self._service)
-            logger.info("mDNS ai-dictation.local -> %s", address)
+            service_specs = (
+                ("_voxcortex._tcp.local.", "VoxCortex._voxcortex._tcp.local.", "voxcortex.local."),
+                # Keep the former hostname working for devices configured before the rename.
+                ("_m5-dictation._tcp.local.", "VoxCortex Legacy._m5-dictation._tcp.local.", "ai-dictation.local."),
+            )
+            for service_type, name, server in service_specs:
+                service = ServiceInfo(
+                    service_type,
+                    name,
+                    addresses=[socket.inet_aton(address)],
+                    port=self.settings.port,
+                    properties={"protocol": "1"},
+                    server=server,
+                )
+                self._zeroconf.register_service(service)
+                self._services.append(service)
+            logger.info("mDNS voxcortex.local (legacy: ai-dictation.local) -> %s", address)
         except Exception:
             logger.exception("Не удалось зарегистрировать mDNS; сервер продолжит работу по IP-адресу")
             self._close_mdns()
@@ -159,12 +166,12 @@ class ServerRuntime:
         if self._zeroconf is None:
             return
         try:
-            if self._service is not None:
-                self._zeroconf.unregister_service(self._service)
+            for service in reversed(self._services):
+                self._zeroconf.unregister_service(service)
         finally:
             self._zeroconf.close()
             self._zeroconf = None
-            self._service = None
+            self._services.clear()
 
     def run(self) -> None:
         self._register_mdns()
@@ -184,7 +191,7 @@ class ServerRuntime:
         if self.thread and self.thread.is_alive():
             return
         self.failure = None
-        self.thread = threading.Thread(target=self._thread_target, name="m5-server", daemon=True)
+        self.thread = threading.Thread(target=self._thread_target, name="voxcortex-server", daemon=True)
         self.thread.start()
 
     def stop(self, timeout: float = 10.0) -> None:

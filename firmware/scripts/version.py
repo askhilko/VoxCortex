@@ -33,9 +33,9 @@ def quoted(value: str) -> str:
 
 env.Append(
     CPPDEFINES=[
-        ("M5_FIRMWARE_VERSION", quoted(version)),
-        ("M5_FIRMWARE_BUILD", quoted(build)),
-        ("M5_FIRMWARE_BOARD", quoted(board)),
-        ("M5_PROTOCOL_VERSION", protocol),
+        ("VOXCORTEX_FIRMWARE_VERSION", quoted(version)),
+        ("VOXCORTEX_FIRMWARE_BUILD", quoted(build)),
+        ("VOXCORTEX_FIRMWARE_BOARD", quoted(board)),
+        ("VOXCORTEX_PROTOCOL_VERSION", protocol),
     ]
 )

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from m5_dictation.firmware_updater import (
+from voxcortex.firmware_updater import (
     FirmwareManifest,
     FirmwareUpdateError,
     compare_versions,

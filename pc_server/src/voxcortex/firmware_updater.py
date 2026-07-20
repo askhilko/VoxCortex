@@ -12,6 +12,7 @@ from typing import Any, Callable, Sequence
 
 
 SUPPORTED_USB_IDS = {(0x1A86, 0x55D4)}  # WCH CH9102 used by M5StickC Plus2.
+# Retained so the renamed desktop app can update firmware released before VoxCortex.
 INFO_PREFIX = "M5AI_INFO "
 
 

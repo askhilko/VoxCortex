@@ -3,10 +3,10 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
-$Exe = Join-Path $Root 'release\M5AIDictationServer\M5AIDictationServer.exe'
+$Exe = Join-Path $Root 'release\VoxCortex\VoxCortex.exe'
 $AppDir = Split-Path -Parent $Exe
 $Startup = [Environment]::GetFolderPath('Startup')
-$ShortcutPath = Join-Path $Startup 'M5 AI Dictation Server.lnk'
+$ShortcutPath = Join-Path $Startup 'VoxCortex.lnk'
 
 if (-not (Test-Path -LiteralPath $Exe)) {
     throw 'Server EXE not found. Run .\scripts\build_server_exe.ps1 first.'

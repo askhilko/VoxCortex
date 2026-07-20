@@ -47,14 +47,14 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: |
-            release/M5AIDictationServer-*-windows.zip
-            release/M5AIDictationFirmware-*-windows.zip
+            release/VoxCortex-*-windows.zip
+            release/VoxCortexFirmware-*-windows.zip
             release/SHA256SUMS.txt
       - name: Create GitHub release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $app = Get-ChildItem release\M5AIDictationServer-*-windows.zip | Select-Object -First 1
-          $firmware = Get-ChildItem release\M5AIDictationFirmware-*-windows.zip | Select-Object -First 1
+          $app = Get-ChildItem release\VoxCortex-*-windows.zip | Select-Object -First 1
+          $firmware = Get-ChildItem release\VoxCortexFirmware-*-windows.zip | Select-Object -First 1
           gh release create $env:GITHUB_REF_NAME --generate-notes $app.FullName $firmware.FullName release\SHA256SUMS.txt

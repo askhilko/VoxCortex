@@ -23,9 +23,9 @@ import pytest
         "tokenizers",
         "esptool",
         "serial",
-        "m5_dictation.app",
-        "m5_dictation.tray",
-        "m5_dictation.firmware_updater",
+        "voxcortex.app",
+        "voxcortex.tray",
+        "voxcortex.firmware_updater",
     ],
 )
 def test_runtime_dependency_imports(module: str) -> None:

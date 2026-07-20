@@ -10,7 +10,8 @@ from typing import Any, Iterable
 import yaml
 
 
-APP_DATA_DIR_NAME = "M5AIDictationRemote"
+APP_DATA_DIR_NAME = "VoxCortex"
+LEGACY_APP_DATA_DIR_NAMES = ("M5AIDictationRemote",)
 
 
 def application_dir() -> Path:
@@ -19,17 +20,19 @@ def application_dir() -> Path:
     return Path.cwd().resolve()
 
 
-def user_data_dir() -> Path:
-    override = os.environ.get("M5_DICTATION_DATA_DIR")
-    if override:
-        return Path(os.path.expandvars(override)).expanduser().resolve()
+def _user_data_root() -> Path:
     if os.name == "nt":
         base = os.environ.get("LOCALAPPDATA")
-        root = Path(base) if base else Path.home() / "AppData" / "Local"
-    else:
-        base = os.environ.get("XDG_DATA_HOME")
-        root = Path(base).expanduser() if base else Path.home() / ".local" / "share"
-    return (root / APP_DATA_DIR_NAME).resolve()
+        return Path(base) if base else Path.home() / "AppData" / "Local"
+    base = os.environ.get("XDG_DATA_HOME")
+    return Path(base).expanduser() if base else Path.home() / ".local" / "share"
+
+
+def user_data_dir() -> Path:
+    override = os.environ.get("VOXCORTEX_DATA_DIR") or os.environ.get("M5_DICTATION_DATA_DIR")
+    if override:
+        return Path(os.path.expandvars(override)).expanduser().resolve()
+    return (_user_data_root() / APP_DATA_DIR_NAME).resolve()
 
 
 def default_config_path() -> Path:
@@ -116,6 +119,10 @@ def prepare_user_config(
 
     if legacy_paths is None:
         legacy_paths = (
+            *(
+                _user_data_root() / name / "config.yaml"
+                for name in LEGACY_APP_DATA_DIR_NAMES
+            ),
             application_dir() / "config.yaml",
             _source_config_dir() / "config.yaml",
         )

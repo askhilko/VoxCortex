@@ -55,6 +55,7 @@ def package(build_dir: Path, output_dir: Path, root: Path) -> Path:
     build = resolve_build_id(root)
     manifest = {
         "schema": 1,
+        "product": "VoxCortex",
         "version": str(metadata["version"]),
         "build": build,
         "board": str(metadata["board"]),

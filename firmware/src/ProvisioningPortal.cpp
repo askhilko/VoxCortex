@@ -4,7 +4,7 @@
 
 void ProvisioningPortal::begin(const String& suffix, SettingsStore& store) {
   store_ = &store;
-  apName_ = "M5-AI-Remote-" + suffix;
+  apName_ = "VoxCortex-" + suffix;
   WiFi.mode(WIFI_AP);
   WiFi.softAP(apName_.c_str());
   dns_.start(53, "*", WiFi.softAPIP());
@@ -29,14 +29,14 @@ String ProvisioningPortal::escapeHtml(const String& value) const {
 }
 
 String ProvisioningPortal::page(const String& error) const {
-  return String("<!doctype html><meta name=viewport content='width=device-width'><title>M5 AI Remote</title>") +
+  return String("<!doctype html><meta name=viewport content='width=device-width'><title>VoxCortex</title>") +
       "<style>body{font:16px sans-serif;max-width:32rem;margin:2rem auto;padding:0 1rem}input{width:100%;padding:.6rem;margin:.25rem 0 1rem;box-sizing:border-box}button{padding:.7rem 1.2rem}.e{color:#b00}</style>" +
-      "<h1>M5 AI Dictation</h1><p>Connect this device to your 2.4 GHz Wi-Fi.</p><p class=e>" + escapeHtml(error) + "</p>" +
+      "<h1>VoxCortex</h1><p>Connect this device to your 2.4 GHz Wi-Fi.</p><p class=e>" + escapeHtml(error) + "</p>" +
       "<form method=post action=/save><label>Wi-Fi SSID<input name=ssid maxlength=32 required></label>" +
       "<label>Wi-Fi password<input name=password type=password maxlength=63></label>" +
-      "<label>PC host or IP<input name=host value='ai-dictation.local' maxlength=128 required></label>" +
+      "<label>PC host or IP<input name=host value='voxcortex.local' maxlength=128 required></label>" +
       "<label>Port<input name=port type=number value=8765 min=1 max=65535 required></label>" +
-      "<label>Device name<input name=name value='M5 AI Remote' maxlength=48></label>" +
+      "<label>Device name<input name=name value='VoxCortex M5' maxlength=48></label>" +
       "<label>Maximum recording, seconds<input name=max_rec type=number value=120 min=1 max=600></label>" +
       "<label><input name=sounds type=checkbox checked style='width:auto'> Enable sounds</label><br><br>" +
       "<button>Save and restart</button></form>";

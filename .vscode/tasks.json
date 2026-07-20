@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "M5: Запустить приложение из исходников",
+      "label": "VoxCortex: Запустить приложение из исходников",
       "type": "process",
       "command": "powershell.exe",
       "args": [

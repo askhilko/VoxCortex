@@ -1,4 +1,4 @@
-from m5_dictation.tray import main
+from voxcortex.tray import main
 
 
 if __name__ == "__main__":

@@ -65,10 +65,10 @@ void printFirmwareInfo() {
   Serial.printf(
       "M5AI_INFO {\"board\":\"%s\",\"version\":\"%s\",\"build\":\"%s\","
       "\"protocol\":%u,\"device_id\":\"%s\"}\n",
-      M5_FIRMWARE_BOARD,
-      M5_FIRMWARE_VERSION,
-      M5_FIRMWARE_BUILD,
-      static_cast<unsigned>(M5_PROTOCOL_VERSION),
+      VOXCORTEX_FIRMWARE_BOARD,
+      VOXCORTEX_FIRMWARE_VERSION,
+      VOXCORTEX_FIRMWARE_BUILD,
+      static_cast<unsigned>(VOXCORTEX_PROTOCOL_VERSION),
       deviceId.c_str());
 }
 
@@ -79,6 +79,7 @@ void handleSerialCommands() {
     if (value == '\r') continue;
     if (value == '\n') {
       command.trim();
+      // Legacy serial command retained for desktop updaters released before the rename.
       if (command == "M5AI INFO") printFirmwareInfo();
       command = "";
     } else if (command.length() < 64) {
@@ -382,7 +383,7 @@ void setup() {
   config = settingsStore.load();
   deviceId = "m5stick-" + chipSuffix();
   printFirmwareInfo();
-  if (config.deviceName.isEmpty()) config.deviceName = "M5 AI Remote " + chipSuffix();
+  if (config.deviceName.isEmpty()) config.deviceName = "VoxCortex M5 " + chipSuffix();
   bool resetRequested = digitalRead(kButtonBPin) == LOW;
   uint8_t bootFailures = config.valid() ? settingsStore.incrementBootFailures() : 0;
   if (resetRequested) {

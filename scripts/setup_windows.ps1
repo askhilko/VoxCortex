@@ -24,13 +24,13 @@ if (-not $Python) { throw 'Python 3.11, 3.12, or 3.14 is required. Install it fr
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip
 & .\.venv\Scripts\python.exe -m pip install -e ".\pc_server[speech,firmware]"
 
-$ConfigPath = & .\.venv\Scripts\python.exe -c "from m5_dictation.config import prepare_user_config; print(prepare_user_config())"
+$ConfigPath = & .\.venv\Scripts\python.exe -c "from voxcortex.config import prepare_user_config; print(prepare_user_config())"
 Write-Host "User configuration: $ConfigPath"
 
 if (-not $SkipModel) {
     $Download = Read-Host 'Download/load the configured faster-whisper model now? [y/N]'
     if ($Download -match '^[yY]') {
-        & .\.venv\Scripts\python.exe -c "from m5_dictation.config import load_settings, prepare_user_config; from m5_dictation.transcriber import WhisperTranscriber; settings=load_settings(prepare_user_config()); WhisperTranscriber(settings.speech).load(); print(f'Model ready: {settings.speech.models_dir}')"
+        & .\.venv\Scripts\python.exe -c "from voxcortex.config import load_settings, prepare_user_config; from voxcortex.transcriber import WhisperTranscriber; settings=load_settings(prepare_user_config()); WhisperTranscriber(settings.speech).load(); print(f'Model ready: {settings.speech.models_dir}')"
     }
 }
 

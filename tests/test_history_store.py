@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from m5_dictation.app import RecognitionEvent
-from m5_dictation.history_store import RecognitionHistoryStore
+from voxcortex.app import RecognitionEvent
+from voxcortex.history_store import RecognitionHistoryStore
 
 
 def _event(number: int) -> RecognitionEvent:

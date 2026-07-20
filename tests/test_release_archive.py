@@ -8,9 +8,9 @@ import pytest
 from tools.verify_release_archive import ReleaseArchiveError, validate_release_archive
 
 
-ROOT = "M5AIDictationServer"
+ROOT = "VoxCortex"
 SAFE_FILES = {
-    f"{ROOT}/M5AIDictationServer.exe": b"exe",
+    f"{ROOT}/VoxCortex.exe": b"exe",
     f"{ROOT}/config.example.yaml": b"host: 0.0.0.0\n",
     f"{ROOT}/README.md": b"guide",
 }

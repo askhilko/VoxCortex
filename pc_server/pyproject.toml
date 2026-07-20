@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "m5-ai-dictation-server"
+name = "voxcortex"
 version = "1.7.1"
-description = "Local speech-to-text server for M5StickC Plus2"
+description = "Local-first AI voice gateway for handheld and embedded devices"
 license = "MIT"
 requires-python = ">=3.11,<3.15"
 dependencies = [
@@ -26,9 +26,9 @@ firmware = ["esptool>=5,<6", "pyserial>=3.5,<4"]
 test = ["pytest>=8.3,<10"]
 
 [project.scripts]
-m5-dictation-server = "m5_dictation.cli:main"
-m5-dictation-tray = "m5_dictation.tray:main"
-m5-dictation-flash = "m5_dictation.firmware_updater:main"
+voxcortex-server = "voxcortex.cli:main"
+voxcortex-tray = "voxcortex.tray:main"
+voxcortex-flash = "voxcortex.firmware_updater:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

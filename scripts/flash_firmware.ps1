@@ -20,7 +20,7 @@ if (-not (Test-Path -LiteralPath $Manifest)) {
     throw 'Firmware manifest not found. Run .\scripts\build_firmware.ps1 first.'
 }
 
-$UpdaterArguments = @('-m', 'm5_dictation.firmware_updater', '--manifest', $Manifest)
+$UpdaterArguments = @('-m', 'voxcortex.firmware_updater', '--manifest', $Manifest)
 if ($Port) { $UpdaterArguments += @('--port', $Port) }
 if ($Factory) { $UpdaterArguments += '--factory' }
 if ($Force) { $UpdaterArguments += '--force' }

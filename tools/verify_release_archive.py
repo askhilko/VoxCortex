@@ -5,9 +5,9 @@ from pathlib import Path, PurePosixPath
 from zipfile import BadZipFile, ZipFile
 
 
-EXPECTED_ROOT = "M5AIDictationServer"
+EXPECTED_ROOT = "VoxCortex"
 FORBIDDEN_RUNTIME_ITEMS = {"config.yaml", "history.json", "logs", "models", "tmp"}
-REQUIRED_RELEASE_ITEMS = {"M5AIDictationServer.exe", "config.example.yaml", "README.md"}
+REQUIRED_RELEASE_ITEMS = {"VoxCortex.exe", "config.example.yaml", "README.md"}
 
 
 class ReleaseArchiveError(RuntimeError):

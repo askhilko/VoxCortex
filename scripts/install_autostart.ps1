@@ -2,8 +2,8 @@
 param()
 $Root = Split-Path -Parent $PSScriptRoot
 $Startup = [Environment]::GetFolderPath('Startup')
-$ShortcutPath = Join-Path $Startup 'M5 AI Dictation Server.lnk'
-$Exe = Join-Path $Root 'release\M5AIDictationServer\M5AIDictationServer.exe'
+$ShortcutPath = Join-Path $Startup 'VoxCortex.lnk'
+$Exe = Join-Path $Root 'release\VoxCortex\VoxCortex.exe'
 if ($PSCmdlet.ShouldProcess($ShortcutPath, 'Create startup shortcut')) {
     $Shell = New-Object -ComObject WScript.Shell
     $Shortcut = $Shell.CreateShortcut($ShortcutPath)

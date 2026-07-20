@@ -5,9 +5,9 @@ $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 $Python = Join-Path $Root '.venv\Scripts\python.exe'
 $BuildRoot = Join-Path $Root '.build\server'
-$Icon = Join-Path $BuildRoot 'M5AIDictationServer.ico'
+$Icon = Join-Path $BuildRoot 'VoxCortex.ico'
 $DistRoot = Join-Path $Root 'release'
-$AppDir = Join-Path $DistRoot 'M5AIDictationServer'
+$AppDir = Join-Path $DistRoot 'VoxCortex'
 $PreserveRoot = Join-Path $BuildRoot 'preserved-runtime'
 $RuntimeItems = @('models', 'config.yaml', 'history.json', 'logs', 'tmp')
 $FirmwareSource = Join-Path $DistRoot 'firmware'
@@ -33,7 +33,7 @@ if (-not $SkipInstall) {
     if ($LASTEXITCODE -ne 0) { throw 'Could not install EXE build dependencies.' }
 }
 
-& $Python -m m5_dictation.icons --output $Icon
+& $Python -m voxcortex.icons --output $Icon
 if ($LASTEXITCODE -ne 0) { throw 'Could not create application icon.' }
 
 $Arguments = @(
@@ -42,7 +42,7 @@ $Arguments = @(
     '--onedir',
     '--windowed',
     '--noupx',
-    '--name', 'M5AIDictationServer',
+    '--name', 'VoxCortex',
     '--icon', $Icon,
     '--paths', "$Root\pc_server\src",
     '--distpath', $DistRoot,
@@ -113,7 +113,7 @@ Get-ChildItem -LiteralPath $FirmwareSource -File |
     Where-Object { $_.Name -ne 'M5FirmwareUpdater.exe' } |
     Copy-Item -Destination $FirmwareTarget -Force
 
-$Exe = Join-Path $AppDir 'M5AIDictationServer.exe'
+$Exe = Join-Path $AppDir 'VoxCortex.exe'
 $Hash = Get-FileHash -Algorithm SHA256 -LiteralPath $Exe
 Write-Host "Built: $Exe"
 Write-Host "SHA256: $($Hash.Hash.ToLowerInvariant())"

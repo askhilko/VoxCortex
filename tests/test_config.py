@@ -6,7 +6,26 @@ from pathlib import Path
 
 import yaml
 
-from m5_dictation.config import load_settings, prepare_user_config, save_settings
+from voxcortex.config import load_settings, prepare_user_config, save_settings
+
+
+def test_migrates_former_product_data_directory(tmp_path: Path, monkeypatch) -> None:
+    local_app_data = tmp_path / "LocalAppData"
+    legacy = local_app_data / "M5AIDictationRemote"
+    legacy.mkdir(parents=True)
+    (legacy / "config.yaml").write_text(
+        yaml.safe_dump({"speech": {"model": "tiny", "models_dir": "models"}}),
+        encoding="utf-8",
+    )
+    (legacy / "history.json").write_text('{"version": 1, "items": []}', encoding="utf-8")
+    monkeypatch.setenv("LOCALAPPDATA", str(local_app_data))
+    monkeypatch.delenv("VOXCORTEX_DATA_DIR", raising=False)
+    monkeypatch.delenv("M5_DICTATION_DATA_DIR", raising=False)
+
+    config_path = prepare_user_config()
+
+    assert config_path == local_app_data / "VoxCortex" / "config.yaml"
+    assert (local_app_data / "VoxCortex" / "history.json").is_file()
 
 
 def test_migrates_legacy_runtime_data_once(tmp_path: Path, monkeypatch) -> None:
@@ -33,7 +52,7 @@ def test_migrates_legacy_runtime_data_once(tmp_path: Path, monkeypatch) -> None:
     (legacy / "tmp" / "recording.wav").write_bytes(b"test wav")
 
     data_dir = tmp_path / "local-app-data"
-    monkeypatch.setenv("M5_DICTATION_DATA_DIR", str(data_dir))
+    monkeypatch.setenv("VOXCORTEX_DATA_DIR", str(data_dir))
     config_path = prepare_user_config(legacy_paths=[legacy / "config.yaml"])
     settings = load_settings(config_path)
 

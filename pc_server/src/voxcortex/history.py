@@ -76,7 +76,7 @@ class RecognitionHistoryWindow:
         self.empty_label: ttk.Label | None = None
         self.devices: dict[str, DeviceStatusEvent] = {}
 
-        root.title("M5 AI Dictation")
+        root.title("VoxCortex")
         root.geometry("880x680")
         root.minsize(640, 500)
         root.configure(background="#F3F5F7")
@@ -88,7 +88,7 @@ class RecognitionHistoryWindow:
         header.pack(fill="x")
         tk.Label(
             header,
-            text="M5 AI Dictation",
+            text="VoxCortex",
             background="#16324F",
             foreground="white",
             font=("Segoe UI Semibold", 17),

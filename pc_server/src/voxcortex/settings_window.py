@@ -153,7 +153,7 @@ class SettingsWindow:
 
         window = tk.Toplevel(self.root)
         self.window = window
-        window.title("M5 AI Dictation — настройки")
+        window.title("VoxCortex — настройки")
         window.geometry("680x680")
         window.minsize(620, 620)
         window.transient(self.root)
