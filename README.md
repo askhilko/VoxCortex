@@ -41,6 +41,16 @@ Windows, локально распознаётся с помощью faster-whis
 после чего ZIP-архивы и `SHA256SUMS.txt` публикуются в GitHub Releases. Исходный код отдельно
 скачивается стандартными архивами GitHub или через `git clone`.
 
+Для выпуска сопровождающий проекта должен добавить в GitHub Actions secrets:
+
+- `WINDOWS_SIGNING_CERTIFICATE_BASE64` — PFX-сертификат подписи кода в Base64;
+- `WINDOWS_SIGNING_CERTIFICATE_PASSWORD` — пароль PFX.
+
+При необходимости URL RFC 3161-сервера задаётся repository variable
+`WINDOWS_SIGNING_TIMESTAMP_URL`; по умолчанию используется сервер DigiCert. Workflow подписывает
+EXE до упаковки, проверяет Authenticode-подпись и создаёт GitHub artifact attestations для обоих
+ZIP-архивов и файла контрольных сумм. Без сертификата выпуск намеренно завершается ошибкой.
+
 ## Лицензия и развитие
 
 Исходный код этого репозитория распространяется по лицензии MIT. Текущая версия бесплатна; уже
