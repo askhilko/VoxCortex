@@ -24,15 +24,13 @@ if (-not $Python) { throw 'Python 3.11, 3.12, or 3.14 is required. Install it fr
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip
 & .\.venv\Scripts\python.exe -m pip install -e ".\pc_server[speech,firmware]"
 
-if (-not (Test-Path .\pc_server\config.yaml)) {
-    Copy-Item .\pc_server\config.example.yaml .\pc_server\config.yaml
-    Write-Host "Created pc_server\config.yaml."
-}
+$ConfigPath = & .\.venv\Scripts\python.exe -c "from m5_dictation.config import prepare_user_config; print(prepare_user_config())"
+Write-Host "User configuration: $ConfigPath"
 
 if (-not $SkipModel) {
     $Download = Read-Host 'Download/load the configured faster-whisper model now? [y/N]'
     if ($Download -match '^[yY]') {
-        & .\.venv\Scripts\python.exe -c "from m5_dictation.config import load_settings; from m5_dictation.transcriber import WhisperTranscriber; settings=load_settings('pc_server/config.yaml'); WhisperTranscriber(settings.speech).load(); print(f'Model ready: {settings.speech.models_dir}')"
+        & .\.venv\Scripts\python.exe -c "from m5_dictation.config import load_settings, prepare_user_config; from m5_dictation.transcriber import WhisperTranscriber; settings=load_settings(prepare_user_config()); WhisperTranscriber(settings.speech).load(); print(f'Model ready: {settings.speech.models_dir}')"
     }
 }
 
@@ -44,4 +42,4 @@ $Port = 8765
 $InUse = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
 if ($InUse) { Write-Warning "Port $Port is already in use." } else { Write-Host "Port $Port is available." }
 Write-Host "If the M5 cannot connect, allow TCP port $Port for Private networks in Windows Firewall."
-Write-Host 'Edit pc_server\config.yaml, then run .\scripts\start_server.ps1'
+Write-Host "Edit $ConfigPath, then run .\scripts\start_server.ps1"

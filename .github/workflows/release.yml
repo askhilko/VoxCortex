@@ -40,13 +40,6 @@ jobs:
       - name: Build Windows application with integrated updater
         shell: pwsh
         run: .\scripts\build_server_exe.ps1 -SkipInstall
-      - name: Sign Windows executable
-        shell: pwsh
-        env:
-          WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
-          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
-          WINDOWS_SIGNING_TIMESTAMP_URL: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_URL }}
-        run: .\scripts\sign_windows.ps1
       - name: Create Windows application archive
         shell: pwsh
         run: .\scripts\package_release.ps1

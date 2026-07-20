@@ -1,10 +1,150 @@
 from __future__ import annotations
 
+import os
+import shutil
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import yaml
+
+
+APP_DATA_DIR_NAME = "M5AIDictationRemote"
+
+
+def application_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path.cwd().resolve()
+
+
+def user_data_dir() -> Path:
+    override = os.environ.get("M5_DICTATION_DATA_DIR")
+    if override:
+        return Path(os.path.expandvars(override)).expanduser().resolve()
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA")
+        root = Path(base) if base else Path.home() / "AppData" / "Local"
+    else:
+        base = os.environ.get("XDG_DATA_HOME")
+        root = Path(base).expanduser() if base else Path.home() / ".local" / "share"
+    return (root / APP_DATA_DIR_NAME).resolve()
+
+
+def default_config_path() -> Path:
+    return user_data_dir() / "config.yaml"
+
+
+def _source_config_dir() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _unique_paths(paths: Iterable[Path]) -> list[Path]:
+    result: list[Path] = []
+    seen: set[str] = set()
+    for path in paths:
+        resolved = path.resolve()
+        key = os.path.normcase(str(resolved))
+        if key not in seen:
+            seen.add(key)
+            result.append(resolved)
+    return result
+
+
+def _resolve_path(base: Path, value: object) -> Path:
+    path = Path(os.path.expandvars(str(value))).expanduser()
+    if not path.is_absolute():
+        path = base / path
+    return path.resolve()
+
+
+def _copy_tree_missing(source: Path, target: Path) -> None:
+    if not source.is_dir():
+        return
+    for item in source.rglob("*"):
+        relative = item.relative_to(source)
+        destination = target / relative
+        if item.is_dir():
+            destination.mkdir(parents=True, exist_ok=True)
+        elif not destination.exists():
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(item, destination)
+
+
+def _migrate_supporting_data(legacy_config: Path, data_dir: Path) -> None:
+    legacy_dir = legacy_config.parent
+    legacy_history = legacy_dir / "history.json"
+    target_history = data_dir / "history.json"
+    if legacy_history.is_file() and not target_history.exists():
+        shutil.copy2(legacy_history, target_history)
+    _copy_tree_missing(legacy_dir / "logs", data_dir / "logs")
+    _copy_tree_missing(legacy_dir / "tmp", data_dir / "tmp")
+
+
+def _write_migrated_config(legacy_config: Path, target: Path) -> None:
+    raw = _mapping(yaml.safe_load(legacy_config.read_text(encoding="utf-8")), "config")
+    speech_raw = _mapping(raw.get("speech"), "speech").copy()
+    legacy_models = _resolve_path(legacy_config.parent, speech_raw.get("models_dir", "models"))
+
+    raw["temp_dir"] = "tmp"
+    raw["log_dir"] = "logs"
+    speech_raw["models_dir"] = str(legacy_models) if legacy_models.is_dir() else "models"
+    raw["speech"] = speech_raw
+
+    temporary = target.with_name(f".{target.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_text(
+            yaml.safe_dump(raw, allow_unicode=True, sort_keys=False),
+            encoding="utf-8",
+        )
+        temporary.replace(target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def prepare_user_config(
+    *,
+    legacy_paths: Iterable[Path] | None = None,
+    template_path: Path | None = None,
+) -> Path:
+    """Create the per-user config and non-destructively import legacy runtime data."""
+    data_dir = user_data_dir()
+    config_path = data_dir / "config.yaml"
+    migration_marker = data_dir / ".legacy-migration-complete"
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    if legacy_paths is None:
+        legacy_paths = (
+            application_dir() / "config.yaml",
+            _source_config_dir() / "config.yaml",
+        )
+    candidates = [
+        path for path in _unique_paths(legacy_paths)
+        if path != config_path and path.is_file()
+    ]
+    legacy_config = candidates[0] if candidates else None
+
+    if not config_path.exists():
+        if legacy_config is not None:
+            _write_migrated_config(legacy_config, config_path)
+        else:
+            templates = [template_path] if template_path else [
+                application_dir() / "config.example.yaml",
+                _source_config_dir() / "config.example.yaml",
+            ]
+            template = next(
+                (path.resolve() for path in templates if path is not None and path.is_file()),
+                None,
+            )
+            if template is None:
+                raise FileNotFoundError("config.example.yaml was not found")
+            shutil.copy2(template, config_path)
+
+    if legacy_config is not None and not migration_marker.exists():
+        _migrate_supporting_data(legacy_config, data_dir)
+        migration_marker.touch()
+    return config_path
 
 
 @dataclass(frozen=True)
@@ -84,16 +224,16 @@ def load_settings(path: str | Path) -> Settings:
     settings = Settings(
         host=str(raw.get("host", "0.0.0.0")),
         port=int(raw.get("port", 8765)),
-        temp_dir=(base / str(raw.get("temp_dir", "tmp"))).resolve(),
+        temp_dir=_resolve_path(base, raw.get("temp_dir", "tmp")),
         keep_wav=bool(raw.get("keep_wav", False)),
-        log_dir=(base / str(raw.get("log_dir", "logs"))).resolve(),
+        log_dir=_resolve_path(base, raw.get("log_dir", "logs")),
         diagnostic=bool(raw.get("diagnostic", False)),
         insertion_enabled=bool(raw.get("insertion_enabled", True)),
         paste_delay_ms=int(raw.get("paste_delay_ms", 300)),
         restore_clipboard=bool(raw.get("restore_clipboard", False)),
         speech=SpeechSettings(
             model=str(speech_raw.get("model", "small")),
-            models_dir=(base / str(speech_raw.get("models_dir", "models"))).resolve(),
+            models_dir=_resolve_path(base, speech_raw.get("models_dir", "models")),
             language="ru",
             vad=bool(speech_raw.get("vad", True)),
             beam_size=int(speech_raw.get("beam_size", 5)),

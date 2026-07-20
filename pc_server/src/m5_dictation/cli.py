@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import argparse
-from .config import load_settings
+from pathlib import Path
+
+from .config import load_settings, prepare_user_config
 from .runtime import ServerRuntime, configure_logging
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="M5 AI Dictation local server")
-    parser.add_argument("--config", default="config.yaml", help="Path to YAML configuration")
+    parser.add_argument("--config", type=Path, help="Path to YAML configuration")
     args = parser.parse_args()
-    settings = load_settings(args.config)
+    config_path = args.config.resolve() if args.config else prepare_user_config()
+    settings = load_settings(config_path)
     configure_logging(settings.log_dir, settings.diagnostic)
     ServerRuntime(settings).run()
 

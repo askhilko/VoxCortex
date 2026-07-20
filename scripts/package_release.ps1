@@ -30,13 +30,14 @@ Get-ChildItem -LiteralPath $AppDir -Force |
     Where-Object { $_.Name -notin $ExcludedRuntimeItems } |
     Copy-Item -Destination $StageApp -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $Root 'pc_server\config.example.yaml') `
-    -Destination (Join-Path $StageApp 'config.yaml') -Force
+    -Destination (Join-Path $StageApp 'config.example.yaml') -Force
 Copy-Item -LiteralPath (Join-Path $Root 'docs\USER_GUIDE.md') `
     -Destination (Join-Path $StageApp 'README.md') -Force
 
 $Forbidden = Get-ChildItem -LiteralPath $StageApp -Recurse -Force | Where-Object {
     $RelativePath = $_.FullName.Substring($StageApp.Length).TrimStart('\')
     $RelativePath -eq 'history.json' -or
+    $RelativePath -eq 'config.yaml' -or
     $RelativePath -match '^(models|logs|tmp)(\\|$)'
 }
 if ($Forbidden) {

@@ -9,7 +9,7 @@ $Icon = Join-Path $BuildRoot 'M5AIDictationServer.ico'
 $DistRoot = Join-Path $Root 'release'
 $AppDir = Join-Path $DistRoot 'M5AIDictationServer'
 $PreserveRoot = Join-Path $BuildRoot 'preserved-runtime'
-$RuntimeItems = @('models', 'config.yaml', 'history.json', 'logs')
+$RuntimeItems = @('models', 'config.yaml', 'history.json', 'logs', 'tmp')
 $FirmwareSource = Join-Path $DistRoot 'firmware'
 $FirmwareManifest = Join-Path $FirmwareSource 'manifest.json'
 $env:PYTHONPATH = Join-Path $Root 'pc_server\src'
@@ -102,11 +102,9 @@ foreach ($RuntimeDll in @('msvcp140.dll', 'msvcp140_1.dll', 'vcruntime140.dll', 
     Copy-Item -LiteralPath $RuntimeSource -Destination (Join-Path $InternalDir $RuntimeDll) -Force
 }
 
-$TargetConfig = Join-Path $AppDir 'config.yaml'
-if (-not (Test-Path -LiteralPath $TargetConfig)) {
-    $SourceConfig = Join-Path $Root 'pc_server\config.example.yaml'
-    Copy-Item -LiteralPath $SourceConfig -Destination $TargetConfig
-}
+$TargetConfig = Join-Path $AppDir 'config.example.yaml'
+$SourceConfig = Join-Path $Root 'pc_server\config.example.yaml'
+Copy-Item -LiteralPath $SourceConfig -Destination $TargetConfig -Force
 Copy-Item -LiteralPath (Join-Path $Root 'docs\USER_GUIDE.md') -Destination (Join-Path $AppDir 'README.md') -Force
 
 $FirmwareTarget = Join-Path $AppDir 'firmware'

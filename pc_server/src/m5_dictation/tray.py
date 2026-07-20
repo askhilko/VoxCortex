@@ -16,7 +16,7 @@ from pathlib import Path
 import pystray
 
 from .app import DeviceStatusEvent, RecognitionEvent
-from .config import Settings, load_settings, save_settings
+from .config import Settings, application_dir, load_settings, prepare_user_config, save_settings
 from .history import RecognitionHistoryWindow
 from .history_store import RecognitionHistoryStore
 from .firmware_window import FirmwareUpdateWindow
@@ -28,16 +28,6 @@ from .transcriber import MODEL_OPTIONS, model_is_downloaded
 from .windows_input import activate_window, foreground_window, root_window, window_process_id
 
 LOG = logging.getLogger(__name__)
-
-
-def application_dir() -> Path:
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
-    return Path.cwd()
-
-
-def default_config_path() -> Path:
-    return application_dir() / "config.yaml"
 
 
 def firmware_manifest_path() -> Path:
@@ -355,13 +345,14 @@ def show_error(message: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="M5 AI Dictation Windows tray server")
-    parser.add_argument("--config", type=Path, default=default_config_path())
+    parser.add_argument("--config", type=Path)
     args = parser.parse_args()
     try:
-        settings = load_settings(args.config)
+        config_path = args.config.resolve() if args.config else prepare_user_config()
+        settings = load_settings(config_path)
         log_path = configure_logging(settings.log_dir, settings.diagnostic, console=False)
-        LOG.info("Запуск tray-приложения; конфигурация: %s", args.config.resolve())
-        TrayApplication(settings, log_path, args.config.resolve()).run()
+        LOG.info("Запуск tray-приложения; конфигурация: %s", config_path)
+        TrayApplication(settings, log_path, config_path).run()
     except Exception as exc:
         logging.exception("Не удалось запустить tray-приложение")
         show_error(f"Не удалось запустить M5 AI Dictation.\n\n{exc}")

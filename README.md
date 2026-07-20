@@ -19,7 +19,7 @@ Windows, локально распознаётся с помощью faster-whis
 
 1. Установите Python 3.11, 3.12 или 3.14 и PlatformIO Core.
 2. Выполните `powershell -ExecutionPolicy Bypass -File .\scripts\setup_windows.ps1`.
-3. Проверьте `pc_server\config.yaml`. Полное приложение запускается из исходников командой
+3. Проверьте `%LOCALAPPDATA%\M5AIDictationRemote\config.yaml`. Полное приложение запускается из исходников командой
    `.\scripts\start_tray.ps1` или задачей VS Code `M5: Запустить приложение из исходников`. Консольный
    сервер без GUI запускается через `.\scripts\start_server.ps1`.
 4. Соберите пакет командой `.\scripts\build_firmware.ps1`, запустите главное приложение и нажмите
@@ -38,18 +38,9 @@ Windows, локально распознаётся с помощью faster-whis
 - `tools` — вспомогательные инструменты разработчика.
 
 Теги вида `v*` запускают GitHub Actions: прошивка и Windows-приложение собираются на чистом runner,
-после чего ZIP-архивы и `SHA256SUMS.txt` публикуются в GitHub Releases. Исходный код отдельно
+после чего ZIP-архивы и `SHA256SUMS.txt` публикуются в GitHub Releases. Для релизных файлов создаются
+GitHub artifact attestations; платный сертификат Authenticode не требуется. Исходный код отдельно
 скачивается стандартными архивами GitHub или через `git clone`.
-
-Для выпуска сопровождающий проекта должен добавить в GitHub Actions secrets:
-
-- `WINDOWS_SIGNING_CERTIFICATE_BASE64` — PFX-сертификат подписи кода в Base64;
-- `WINDOWS_SIGNING_CERTIFICATE_PASSWORD` — пароль PFX.
-
-При необходимости URL RFC 3161-сервера задаётся repository variable
-`WINDOWS_SIGNING_TIMESTAMP_URL`; по умолчанию используется сервер DigiCert. Workflow подписывает
-EXE до упаковки, проверяет Authenticode-подпись и создаёт GitHub artifact attestations для обоих
-ZIP-архивов и файла контрольных сумм. Без сертификата выпуск намеренно завершается ошибкой.
 
 ## Лицензия и развитие
 
