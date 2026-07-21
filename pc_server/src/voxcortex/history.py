@@ -63,6 +63,7 @@ class RecognitionHistoryWindow:
         on_open_settings: Callable[[], None] | None = None,
         on_open_firmware: Callable[[], None] | None = None,
         on_clear_history: Callable[[], None] | None = None,
+        on_open_support: Callable[[], None] | None = None,
     ) -> None:
         self.root = root
         self.on_close = on_close
@@ -72,6 +73,7 @@ class RecognitionHistoryWindow:
         self.on_open_settings = on_open_settings
         self.on_open_firmware = on_open_firmware
         self.on_clear_history = on_clear_history
+        self.on_open_support = on_open_support
         self.rows: list[tk.Frame] = []
         self.empty_label: ttk.Label | None = None
         self.devices: dict[str, DeviceStatusEvent] = {}
@@ -113,6 +115,10 @@ class RecognitionHistoryWindow:
             font=("Segoe UI", 9),
         )
         self.status.pack(side="left")
+        if on_open_support is not None:
+            ttk.Button(footer, text="Поддержать проект", command=on_open_support).pack(
+                side="left", padx=(14, 0)
+            )
         ttk.Button(footer, text="Свернуть в трей", command=on_close).pack(side="right", padx=(8, 0))
         ttk.Button(footer, text="Выход", command=on_exit).pack(side="right")
 

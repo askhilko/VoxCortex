@@ -51,7 +51,27 @@ if ($Forbidden) {
 if (Test-Path -LiteralPath $Archive) {
     Remove-Item -LiteralPath $Archive -Force
 }
-Compress-Archive -Path $StageApp -DestinationPath $Archive -CompressionLevel Optimal
+$ArchiveCreated = $false
+for ($Attempt = 1; $Attempt -le 5; $Attempt++) {
+    try {
+        Compress-Archive -Path $StageApp -DestinationPath $Archive -CompressionLevel Optimal
+        $ArchiveCreated = $true
+        break
+    }
+    catch {
+        if (Test-Path -LiteralPath $Archive) {
+            Remove-Item -LiteralPath $Archive -Force
+        }
+        if ($Attempt -eq 5) {
+            throw
+        }
+        Write-Warning "Release files are temporarily busy; retrying archive creation ($Attempt/5)."
+        Start-Sleep -Seconds 2
+    }
+}
+if (-not $ArchiveCreated) {
+    throw 'Release archive was not created.'
+}
 & $Python (Join-Path $Root 'tools\verify_release_archive.py') $Archive
 if ($LASTEXITCODE -ne 0) {
     throw 'Release archive validation failed.'

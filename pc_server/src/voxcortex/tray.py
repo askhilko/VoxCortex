@@ -23,6 +23,7 @@ from .history_store import RecognitionHistoryStore
 from .firmware_window import FirmwareUpdateWindow
 from .icons import create_tray_image
 from .inserter import TextInserter
+from .links import SUPPORT_URL, open_support_page
 from .runtime import ServerRuntime, configure_logging
 from .settings_window import SettingsWindow, confirm_model_download
 from .transcriber import MODEL_OPTIONS, model_is_downloaded
@@ -60,6 +61,7 @@ class TrayApplication:
             self.open_settings,
             self.open_firmware_update,
             self.clear_history,
+            self.open_support,
         )
         self.history.set_action(settings.device.action)
         for event in self.history_store.items:
@@ -93,6 +95,7 @@ class TrayApplication:
             pystray.MenuItem("Сменить модель", pystray.Menu(*model_items)),
             pystray.MenuItem("Распознанные фразы", self.show_history_from_tray, default=True),
             pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Поддержать VoxCortex", self.open_support_from_tray),
             pystray.MenuItem("Выход", self.exit_from_tray),
         )
 
@@ -242,6 +245,18 @@ class TrayApplication:
         current = max(connected, key=lambda event: event.updated_at) if connected else None
         self.firmware_window.show(current)
 
+    def open_support(self) -> None:
+        try:
+            if open_support_page():
+                return
+        except Exception:
+            LOG.exception("Не удалось открыть страницу поддержки")
+        messagebox.showerror(
+            "Не удалось открыть страницу",
+            f"Откройте страницу поддержки вручную:\n\n{SUPPORT_URL}",
+            parent=self.root,
+        )
+
     def clear_history(self) -> None:
         if not self.history_store.items:
             self.history.status.configure(text="История уже пуста", foreground="#425466")
@@ -319,6 +334,9 @@ class TrayApplication:
 
     def show_history_from_tray(self, _icon: pystray.Icon, _item: pystray.MenuItem) -> None:
         self.gui_actions.put(self.history.show)
+
+    def open_support_from_tray(self, _icon: pystray.Icon, _item: pystray.MenuItem) -> None:
+        self.gui_actions.put(self.open_support)
 
     def hide_history(self) -> None:
         if self.tray_ready:
