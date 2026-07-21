@@ -12,6 +12,7 @@ class ProtocolClient {
  public:
   void begin(const DeviceConfig& config, const String& deviceId, StatusCallback callback,
              SettingsCallback settingsCallback);
+  void end();
   void tick();
   bool connected() const { return connected_; }
   bool startRecording(uint32_t sequence, OutputAction action);

@@ -24,6 +24,11 @@ void ProtocolClient::begin(const DeviceConfig& config, const String& deviceId, S
   socket_.onEvent([this](WStype_t type, uint8_t* payload, size_t length) { onEvent(type, payload, length); });
 }
 
+void ProtocolClient::end() {
+  connected_ = false;
+  socket_.disconnect();
+}
+
 void ProtocolClient::tick() { socket_.loop(); }
 
 void ProtocolClient::sendHello() {

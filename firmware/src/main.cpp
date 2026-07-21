@@ -22,6 +22,8 @@ constexpr uint8_t kAutoSpeechStartBlocks = 8;    // 256 ms of sustained sound.
 constexpr uint8_t kAutoSilenceEndBlocks = 38;    // 1.216 seconds of silence.
 constexpr uint16_t kAutoMinimumThreshold = 900;
 constexpr uint16_t kAutoMaximumThreshold = 12000;
+constexpr uint32_t kProtocolResolveIntervalMs = 15000;
+constexpr char kDefaultServerMdnsName[] = "voxcortex";
 
 SettingsStore settingsStore;
 ProvisioningPortal portal;
@@ -41,6 +43,7 @@ uint32_t lastTelemetry = 0;
 bool cWasPressed = false;
 bool mdnsStarted = false;
 bool protocolStarted = false;
+bool wifiWasConnected = false;
 bool recordingRequested = false;
 uint32_t cPressedAt = 0;
 bool autoMode = false;
@@ -210,21 +213,37 @@ void stopAutoMode() {
   setState(AppState::Ready, "Hold A or double M5");
 }
 
+void beginWifiDhcp() {
+  // Explicitly return the station interface to DHCP. This matters when an AP is
+  // replaced by another one with the same credentials but a different subnet.
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
+  WiFi.begin(config.ssid.c_str(), config.password.c_str());
+  lastWifiAttempt = millis();
+}
+
 void connectWifi() {
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
   WiFi.setSleep(false);
-  WiFi.begin(config.ssid.c_str(), config.password.c_str());
-  lastWifiAttempt = millis();
+  beginWifiDhcp();
   setState(AppState::ConnectingWifi, "Joining " + config.ssid);
+}
+
+bool ensureMdnsStarted() {
+  if (!mdnsStarted) mdnsStarted = MDNS.begin(deviceId.c_str());
+  return mdnsStarted;
+}
+
+IPAddress queryMdns(const String& name) {
+  if (!ensureMdnsStarted()) return INADDR_NONE;
+  return MDNS.queryHost(name, 1500);
 }
 
 bool startProtocol() {
   lastProtocolStartAttempt = millis();
   DeviceConfig connectionConfig = config;
   if (connectionConfig.serverHost.endsWith(".local")) {
-    if (!mdnsStarted) mdnsStarted = MDNS.begin(deviceId.c_str());
-    if (!mdnsStarted) {
+    if (!ensureMdnsStarted()) {
       setState(AppState::ConnectingServer, "mDNS start failed");
       return false;
     }
@@ -235,6 +254,21 @@ bool startProtocol() {
       return false;
     }
     connectionConfig.serverHost = resolved.toString();
+  } else {
+    IPAddress configuredIp;
+    if (configuredIp.fromString(connectionConfig.serverHost)) {
+      // An IP entered during provisioning belongs to the old router's subnet
+      // after that router is replaced. Prefer live service discovery when it is
+      // available, while retaining the configured IP as an offline fallback.
+      IPAddress discovered = queryMdns(kDefaultServerMdnsName);
+      if (discovered != INADDR_NONE) {
+        connectionConfig.serverHost = discovered.toString();
+        if (discovered != configuredIp) {
+          Serial.printf("[SERVER] Replaced saved IP %s with mDNS address %s\n",
+                        configuredIp.toString().c_str(), connectionConfig.serverHost.c_str());
+        }
+      }
+    }
   }
   protocol.begin(connectionConfig, deviceId, [](AppState next, const String& message) {
     if (next == AppState::Recording) {
@@ -304,8 +338,21 @@ bool startProtocol() {
     settingsStore.save(config);
     if (state == AppState::Ready) setState(AppState::Ready, "Settings synced");
   });
-  setState(AppState::ConnectingServer, config.serverHost);
+  Serial.printf("[SERVER] Connecting to %s:%u\n", connectionConfig.serverHost.c_str(),
+                connectionConfig.serverPort);
+  setState(AppState::ConnectingServer, connectionConfig.serverHost);
   return true;
+}
+
+void stopNetworkServices() {
+  if (protocolStarted) protocol.end();
+  protocolStarted = false;
+  lastProtocolStartAttempt = 0;
+  lastTelemetry = 0;
+  if (mdnsStarted) {
+    MDNS.end();
+    mdnsStarted = false;
+  }
 }
 
 void handleButtons() {
@@ -410,19 +457,36 @@ void loop() {
   }
 
   if (WiFi.status() != WL_CONNECTED) {
+    if (wifiWasConnected) {
+      wifiWasConnected = false;
+      stopNetworkServices();
+    }
     if (state != AppState::ConnectingWifi) setState(AppState::ConnectingWifi, "WiFi disconnected");
     if (millis() - lastWifiAttempt > 10000) {
       WiFi.disconnect();
-      WiFi.begin(config.ssid.c_str(), config.password.c_str());
-      lastWifiAttempt = millis();
+      beginWifiDhcp();
     }
   } else {
+    if (!wifiWasConnected) {
+      wifiWasConnected = true;
+      Serial.printf("[WIFI] IP %s, gateway %s, mask %s\n",
+                    WiFi.localIP().toString().c_str(), WiFi.gatewayIP().toString().c_str(),
+                    WiFi.subnetMask().toString().c_str());
+    }
     if (!protocolStarted &&
         (lastProtocolStartAttempt == 0 || millis() - lastProtocolStartAttempt >= 5000)) {
       settingsStore.clearBootFailures();
       protocolStarted = startProtocol();
     }
-    if (protocolStarted) protocol.tick();
+    if (protocolStarted) {
+      protocol.tick();
+      // Re-resolve the endpoint periodically while disconnected. Previously the
+      // WebSocket client retried a stale address forever after a network change.
+      if (!protocol.connected() && millis() - lastProtocolStartAttempt >= kProtocolResolveIntervalMs) {
+        protocol.end();
+        protocolStarted = false;
+      }
+    }
     if (protocol.connected() && (lastTelemetry == 0 || millis() - lastTelemetry >= 15000)) {
       bool charging = M5.Power.isCharging() == m5::Power_Class::is_charging;
       protocol.sendTelemetry(M5.Power.getBatteryLevel(), charging, WiFi.RSSI());
