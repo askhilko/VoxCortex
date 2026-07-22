@@ -121,12 +121,14 @@ class SettingsWindow:
         on_save: Callable[[Settings], None],
         config_dir: Path | None = None,
         on_models_changed: Callable[[], None] | None = None,
+        on_open_support: Callable[[], None] | None = None,
     ) -> None:
         self.root = root
         self.settings = settings
         self.on_save = on_save
         self.config_dir = (config_dir or settings.speech.models_dir.parent).resolve()
         self.on_models_changed = on_models_changed
+        self.on_open_support = on_open_support
         self.window: tk.Toplevel | None = None
         self.download_dialog = ModelDownloadDialog(root)
 
@@ -234,6 +236,12 @@ class SettingsWindow:
 
         footer = ttk.Frame(window, padding=(14, 0, 14, 14))
         footer.pack(fill="x")
+        if self.on_open_support is not None:
+            ttk.Button(
+                footer,
+                text="Поддержать проект",
+                command=self.on_open_support,
+            ).pack(side="left")
         ttk.Button(footer, text="Закрыть", command=window.withdraw).pack(side="right", padx=(8, 0))
         self.save_button = ttk.Button(footer, text="Сохранить и применить", command=self._save)
         self.save_button.pack(side="right")

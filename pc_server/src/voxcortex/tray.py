@@ -72,6 +72,7 @@ class TrayApplication:
             self.apply_settings,
             config_path.parent,
             self._models_changed,
+            self.open_support,
         )
         self.firmware_window = FirmwareUpdateWindow(self.root, firmware_manifest_path())
         self.server = ServerRuntime(
