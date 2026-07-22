@@ -2,18 +2,20 @@ $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 $ReleaseDir = Join-Path $Root 'release'
 $Output = Join-Path $ReleaseDir 'SHA256SUMS.txt'
+$Version = (Get-Content -LiteralPath (Join-Path $Root 'firmware\version.json') -Raw |
+    ConvertFrom-Json).version
 
 $Artifacts = @(
     @{ Path = Join-Path $ReleaseDir 'VoxCortex\VoxCortex.exe'; Name = 'VoxCortex/VoxCortex.exe' }
+    @{
+        Path = Join-Path $ReleaseDir "VoxCortexFirmware-$Version-windows.zip"
+        Name = "VoxCortexFirmware-$Version-windows.zip"
+    }
+    @{
+        Path = Join-Path $ReleaseDir "VoxCortex-$Version-windows.zip"
+        Name = "VoxCortex-$Version-windows.zip"
+    }
 )
-$FirmwareArchives = Get-ChildItem -LiteralPath $ReleaseDir -Filter 'VoxCortexFirmware-*-windows.zip' -File -ErrorAction SilentlyContinue
-foreach ($Archive in $FirmwareArchives) {
-    $Artifacts += @{ Path = $Archive.FullName; Name = $Archive.Name }
-}
-$ApplicationArchives = Get-ChildItem -LiteralPath $ReleaseDir -Filter 'VoxCortex-*-windows.zip' -File -ErrorAction SilentlyContinue
-foreach ($Archive in $ApplicationArchives) {
-    $Artifacts += @{ Path = $Archive.FullName; Name = $Archive.Name }
-}
 
 $Checksums = foreach ($Artifact in $Artifacts) {
     if (Test-Path -LiteralPath $Artifact.Path) {
