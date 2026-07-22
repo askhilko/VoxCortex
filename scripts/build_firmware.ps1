@@ -7,11 +7,13 @@ $Python = Join-Path $Root '.venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $Python)) {
     $Python = (Get-Command python -ErrorAction Stop).Source
 }
-if (Test-Path -LiteralPath (Join-Path $Root '.venv\Scripts\pio.exe')) {
-    & (Join-Path $Root '.venv\Scripts\pio.exe') run -d firmware
-} else {
-    pio run -d firmware
+$Pio = Join-Path $Root '.venv\Scripts\pio.exe'
+if (-not (Test-Path -LiteralPath $Pio)) {
+    $Pio = (Get-Command pio -ErrorAction Stop).Source
 }
+& $Pio run -d firmware
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& $Pio run -d firmware -t idedata | Out-Null
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 New-Item -ItemType Directory -Force release | Out-Null
 & $Python (Join-Path $Root 'tools\package_firmware.py') `
