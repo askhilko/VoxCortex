@@ -22,7 +22,7 @@ if (-not $Python) { throw 'Python 3.11, 3.12, or 3.14 is required. Install it fr
 
 & $Python.Exe @($Python.Args) -m venv .venv
 & .\.venv\Scripts\python.exe -m pip install --upgrade pip
-& .\.venv\Scripts\python.exe -m pip install -e ".\pc_server[speech,firmware]"
+& .\.venv\Scripts\python.exe -m pip install -c ".\pc_server\requirements-windows.lock" -e ".\pc_server[speech,firmware]"
 
 $ConfigPath = & .\.venv\Scripts\python.exe -c "from voxcortex.config import prepare_user_config; print(prepare_user_config())"
 Write-Host "User configuration: $ConfigPath"

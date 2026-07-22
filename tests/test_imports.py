@@ -12,7 +12,6 @@ import pytest
         "uvicorn",
         "yaml",
         "pyperclip",
-        "pyautogui",
         "zeroconf",
         "pystray",
         "PIL",

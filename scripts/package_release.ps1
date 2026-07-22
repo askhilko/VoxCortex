@@ -37,6 +37,15 @@ Copy-Item -LiteralPath (Join-Path $Root 'pc_server\config.example.yaml') `
     -Destination (Join-Path $StageApp 'config.example.yaml') -Force
 Copy-Item -LiteralPath (Join-Path $Root 'docs\USER_GUIDE.md') `
     -Destination (Join-Path $StageApp 'README.md') -Force
+Copy-Item -LiteralPath (Join-Path $Root 'LICENSE') `
+    -Destination (Join-Path $StageApp 'LICENSE.txt') -Force
+Copy-Item -LiteralPath (Join-Path $Root 'THIRD_PARTY_NOTICES.md') `
+    -Destination (Join-Path $StageApp 'THIRD_PARTY_NOTICES.md') -Force
+& $Python (Join-Path $Root 'tools\collect_python_licenses.py') `
+    --output (Join-Path $StageApp 'THIRD_PARTY_LICENSES\python')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Could not collect third-party Python license texts.'
+}
 
 $Forbidden = Get-ChildItem -LiteralPath $StageApp -Recurse -Force | Where-Object {
     $RelativePath = $_.FullName.Substring($StageApp.Length).TrimStart('\')

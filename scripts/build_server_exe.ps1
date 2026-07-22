@@ -29,7 +29,7 @@ if (-not (Test-Path -LiteralPath $FirmwareManifest)) {
 }
 
 if (-not $SkipInstall) {
-    & $Python -m pip install -e "$Root\pc_server[speech,firmware,build]"
+    & $Python -m pip install -c "$Root\pc_server\requirements-windows.lock" -e "$Root\pc_server[speech,firmware,build]"
     if ($LASTEXITCODE -ne 0) { throw 'Could not install EXE build dependencies.' }
 }
 
@@ -48,8 +48,10 @@ $Arguments = @(
     '--distpath', $DistRoot,
     '--workpath', "$BuildRoot\work",
     '--specpath', $BuildRoot,
+    '--exclude-module', 'pytest',
+    '--exclude-module', 'pyautogui',
+    '--exclude-module', 'mouseinfo',
     '--hidden-import', 'faster_whisper',
-    '--hidden-import', 'pyautogui',
     '--hidden-import', 'pyperclip',
     '--hidden-import', 'serial',
     '--hidden-import', 'serial.tools.list_ports',
@@ -106,6 +108,9 @@ $TargetConfig = Join-Path $AppDir 'config.example.yaml'
 $SourceConfig = Join-Path $Root 'pc_server\config.example.yaml'
 Copy-Item -LiteralPath $SourceConfig -Destination $TargetConfig -Force
 Copy-Item -LiteralPath (Join-Path $Root 'docs\USER_GUIDE.md') -Destination (Join-Path $AppDir 'README.md') -Force
+Copy-Item -LiteralPath (Join-Path $Root 'LICENSE') -Destination (Join-Path $AppDir 'LICENSE.txt') -Force
+Copy-Item -LiteralPath (Join-Path $Root 'THIRD_PARTY_NOTICES.md') `
+    -Destination (Join-Path $AppDir 'THIRD_PARTY_NOTICES.md') -Force
 
 $FirmwareTarget = Join-Path $AppDir 'firmware'
 New-Item -ItemType Directory -Force -Path $FirmwareTarget | Out-Null

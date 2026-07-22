@@ -72,10 +72,7 @@ def send_hotkey(*keys: str) -> None:
         raise ValueError(f"Unsupported hotkey key: {exc.args[0]}") from exc
 
     if os.name != "nt":
-        import pyautogui
-
-        pyautogui.hotkey(*normalized)
-        return
+        raise OSError("Keyboard input is supported only on Windows")
 
     events = [_keyboard_input(key) for key in virtual_keys]
     events.extend(_keyboard_input(key, key_up=True) for key in reversed(virtual_keys))

@@ -24,6 +24,23 @@ if (Test-Path -LiteralPath $LegacyUpdater) {
     Remove-Item -LiteralPath $LegacyUpdater -Force
 }
 Copy-Item docs\USER_GUIDE.md release\firmware\README.md -Force
+Copy-Item LICENSE release\firmware\LICENSE.txt -Force
+Copy-Item THIRD_PARTY_NOTICES.md release\firmware\THIRD_PARTY_NOTICES.md -Force
+$FirmwareLicenses = Join-Path $Root 'release\firmware\THIRD_PARTY_LICENSES\firmware'
+New-Item -ItemType Directory -Path $FirmwareLicenses -Force | Out-Null
+$FirmwareLicenseSources = @(
+    @{ Name = 'ArduinoJson-7.4.2-LICENSE.txt'; Path = 'firmware\.pio\libdeps\m5stack-stickc-plus2\ArduinoJson\LICENSE.txt' },
+    @{ Name = 'M5GFX-0.2.15-LICENSE.txt'; Path = 'firmware\.pio\libdeps\m5stack-stickc-plus2\M5GFX\LICENSE' },
+    @{ Name = 'M5Unified-0.2.10-LICENSE.txt'; Path = 'firmware\.pio\libdeps\m5stack-stickc-plus2\M5Unified\LICENSE' },
+    @{ Name = 'ArduinoWebSockets-2.6.1-LICENSE.txt'; Path = 'firmware\.pio\libdeps\m5stack-stickc-plus2\WebSockets\LICENSE' }
+)
+foreach ($LicenseSource in $FirmwareLicenseSources) {
+    $Source = Join-Path $Root $LicenseSource.Path
+    if (-not (Test-Path -LiteralPath $Source)) {
+        throw "Firmware dependency license not found: $Source"
+    }
+    Copy-Item -LiteralPath $Source -Destination (Join-Path $FirmwareLicenses $LicenseSource.Name) -Force
+}
 $Version = (Get-Content -LiteralPath (Join-Path $Root 'firmware\version.json') -Raw |
     ConvertFrom-Json).version
 $Archive = Join-Path $Root "release\VoxCortexFirmware-$Version-windows.zip"

@@ -12,7 +12,10 @@ ROOT = "VoxCortex"
 SAFE_FILES = {
     f"{ROOT}/VoxCortex.exe": b"exe",
     f"{ROOT}/config.example.yaml": b"host: 0.0.0.0\n",
+    f"{ROOT}/LICENSE.txt": b"MIT",
     f"{ROOT}/README.md": b"guide",
+    f"{ROOT}/THIRD_PARTY_NOTICES.md": b"notices",
+    f"{ROOT}/THIRD_PARTY_LICENSES/python/example/PACKAGE.txt": b"example",
 }
 
 

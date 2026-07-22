@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 .build/
 *.egg-info/
+pc_server/build/
 .env
 .env.*
 *.pem

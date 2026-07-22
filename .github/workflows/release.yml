@@ -32,7 +32,7 @@ jobs:
         run: |
           python -m venv .venv
           .\.venv\Scripts\python.exe -m pip install --upgrade pip
-          .\.venv\Scripts\python.exe -m pip install "platformio==6.1.19" ".\pc_server[speech,firmware,build]"
+          .\.venv\Scripts\python.exe -m pip install -c .\pc_server\requirements-windows.lock "platformio==6.1.19" ".\pc_server[speech,firmware,build]"
       - run: .\.venv\Scripts\python.exe -m compileall -q pc_server/src tools
       - name: Build firmware package
         shell: pwsh

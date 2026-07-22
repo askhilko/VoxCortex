@@ -7,7 +7,13 @@ from zipfile import BadZipFile, ZipFile
 
 EXPECTED_ROOT = "VoxCortex"
 FORBIDDEN_RUNTIME_ITEMS = {"config.yaml", "history.json", "logs", "models", "tmp"}
-REQUIRED_RELEASE_ITEMS = {"VoxCortex.exe", "config.example.yaml", "README.md"}
+REQUIRED_RELEASE_ITEMS = {
+    "VoxCortex.exe",
+    "config.example.yaml",
+    "LICENSE.txt",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+}
 
 
 class ReleaseArchiveError(RuntimeError):
@@ -44,6 +50,12 @@ def validate_release_archive(path: str | Path, expected_root: str = EXPECTED_ROO
     missing = sorted(REQUIRED_RELEASE_ITEMS - root_files)
     if missing:
         raise ReleaseArchiveError("Required release files are missing: " + ", ".join(missing))
+
+    has_third_party_licenses = any(
+        len(parts) >= 3 and parts[1] == "THIRD_PARTY_LICENSES" for parts in names
+    )
+    if not has_third_party_licenses:
+        raise ReleaseArchiveError("THIRD_PARTY_LICENSES directory is missing or empty")
 
 
 def main() -> int:
