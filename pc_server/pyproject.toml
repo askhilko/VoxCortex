@@ -15,7 +15,7 @@ dependencies = [
   "pyperclip>=1.9,<2",
   "zeroconf>=0.147,<1",
   "pystray>=0.19,<1",
-  "Pillow>=10,<13",
+  "Pillow>=10,<14",
 ]
 
 [project.optional-dependencies]
